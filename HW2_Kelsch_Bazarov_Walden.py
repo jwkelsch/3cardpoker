@@ -5,6 +5,25 @@
 from deck_of_cards import deck_of_cards
 import random
 
+#card.suit   0=spades, 1=hearts, 2=diamonds, 3=clubs
+#card.rank   1=Ace, 11=Jack, 12=Queen, 13=King - 2-10 are just numerical cards
+
+#sorts passed in hand in ascending rank
+def sortRank(hand):
+    c1 = hand[0]
+    c2 = hand[1]
+    c3 = hand[2]
+    if c1.rank > c2.rank:
+        hand[1] = c1
+        hand[0] = c2
+    if c2.rank > c3.rank:
+        hand[1] = c3
+        hand[2] = c2
+    if c1.rank > c3.rank:
+        hand[0] = c3
+        hand[2] = c1
+    return hand
+
 #takes a hand and prints 2 of the 3 cards with symbol format
 def printHandHidden(hand):
     #symbols = '♠', '♥', '♦', '♣'
@@ -85,13 +104,45 @@ def evaluate(hand):
     return evaluation
 
 #takes hands and the bet to determine who won
-def compareHands(uEval, cEval, bet):
+def compareHands(uEval, cEval, bet, uHand, cHand):
     if uEval > cEval:
         print("User wins!", "you won: $", bet)
     if cEval > uEval:
         print("CPU wins")
-    if cEval == uEval:            
-        print('The match is a draw')
+    if cEval == uEval:            #check for high card
+        #print('The match is a draw')
+        if uHand[2] > cHand[2]:
+            print("User wins from highest card\n", "you won: $", bet)
+        if uHand[2] < cHand[2]:
+            print("CPU wins from highest card")
+        if uHand[2] == cHand[2]:
+            print('The match is a draw')
+
+        
+#returns relevant hand for better visualization at endgame
+def handAnalyze(eval, player, hand):
+    if eval == 1:
+        print(player , "has a -pair-")
+    if eval == 2:
+        print(player , "has a -flush-")
+    if eval == 3:
+        print(player , "has a -straight-")
+    if eval == 4:
+        print(player , "has a -triple-")
+    if eval == 5:
+        print(player , "has a -straight flush-")
+    if eval == 0:
+        if hand[2].rank == 1:
+            print(player ,"'s high card is: " , "Ace(1)")
+        elif hand[2].rank == 11:
+            print(player ,"'s high card is: " , "Jack(11)")
+        elif hand[2].rank == 12:
+            print(player ,"'s high card is: " , "Queen(12)")
+        elif hand[2].rank == 13:
+            print(player ,"'s high card is: " , "King(13)")
+        else:
+            print(player ,"'s high card is: " , hand[2].rank)
+
 
 
 #create new card deck
@@ -112,6 +163,7 @@ while playing == True:
     uCard2 = cardDeck.give_first_card()
     uCard3 = cardDeck.give_first_card()
     uHand = [uCard1, uCard2, uCard3]
+    uHand = sortRank(uHand)
     print("Your cards: ")
     printHandHidden(uHand)
     #grab CPU cards, add to its hand
@@ -119,6 +171,7 @@ while playing == True:
     cCard2 = cardDeck.give_first_card()
     cCard3 = cardDeck.give_first_card()
     cHand = [cCard1, cCard2, cCard3]
+    cHand = sortRank(cHand)
     print("----------")
     print("Dealer's cards: ")
     printHandHidden(cHand)
@@ -166,7 +219,10 @@ while playing == True:
     #evaluate winner
     uEval = evaluate(uHand)
     cEval = evaluate(cHand)
-    compareHands(uEval, cEval, bet)
+    #print out hand values in string format, determine if need highest card
+    handAnalyze(uEval, "User", uHand)
+    handAnalyze(cEval, "CPU", cHand)
+    compareHands(uEval, cEval, bet, uHand, cHand)
 
     #ask for another round or exit
     print("Play another round? (y/n) ")
