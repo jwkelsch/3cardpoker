@@ -182,7 +182,7 @@ while playing == True:
     betIn = input()
     bet = int(bet) + int(betIn)
 
-    #loop for cpu bets, matching/raising
+    #cpu bets, matching/raising
     compChoices = ['match', 'match', 'raise', 'raise' 'fold']     #weighting this with duplicates, probably a much better way to do this, using AI components
     raiseChoices = [10, 50, 100, 200]
     choice = random.choice(compChoices)
