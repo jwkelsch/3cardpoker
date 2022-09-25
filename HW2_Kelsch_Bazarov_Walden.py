@@ -157,6 +157,9 @@ while playing == True:
     print("Place a bet: ")
     bet = input()
     print('\n')
+    if int(bet) != 0:
+        print("CPU matches your bet")
+        bet = int(bet) + int(bet)
 
     #grab users cards, add to its hand
     uCard1 = cardDeck.give_first_card()
