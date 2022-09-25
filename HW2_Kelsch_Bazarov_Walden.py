@@ -185,28 +185,24 @@ while playing == True:
     #loop for cpu bets, matching/raising
     compChoices = ['match', 'match', 'raise', 'raise' 'fold']     #weighting this with duplicates, probably a much better way to do this, using AI components
     raiseChoices = [10, 50, 100, 200]
-    bettingWar = True
-    while bettingWar == True:
-        choice = random.choice(compChoices)
-        if choice == 'match' or choice == 'fold':
-            bettingWar = False
-            if choice == 'match':
-                bet = int(bet) + int(betIn)
-                print('CPU matches your bet')
-            if choice == 'fold':
-                print('CPU folds, you win!')
-        if choice == 'raise':
-            raiseBet = random.choice(raiseChoices)
+    choice = random.choice(compChoices)
+    if choice == 'match':
+        bet = int(bet) + int(betIn)
+        print('CPU matches your bet')
+    if choice == 'fold':
+            print('CPU folds, you win!')
+    if choice == 'raise':
+        raiseBet = random.choice(raiseChoices)
+        bet = int(bet) + raiseBet
+        print("CPU has raised by ", raiseBet)
+        print("----------\n", 'Current bet: ', bet, '\n---------' )
+        print('You must match the CPU raise or fold(match or fold):' )
+        usrIn = input()
+        if str(usrIn) == 'match':
             bet = int(bet) + raiseBet
-            print("CPU has raised by ", raiseBet)
             print("----------\n", 'Current bet: ', bet, '\n---------' )
-            print('You must match the CPU raise or fold(match or fold):' )
-            usrIn = input()
-            if str(usrIn) == 'match':
-                bet = int(bet) + raiseBet
-                print("----------\n", 'Current bet: ', bet, '\n---------' )
-            if str(usrIn) == 'fold':
-                print('You fold, CPU has won')
+        if str(usrIn) == 'fold':
+            print('You fold, CPU has won')
 
     #print full hands (reveal 3rd card)
     print("Your cards: ")
