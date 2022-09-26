@@ -104,20 +104,27 @@ def evaluate(hand):
     return evaluation
 
 #takes hands and the bet to determine who won
-def compareHands(uEval, cEval, bet, uHand, cHand):
+def compareHands(uEval, cEval, bet, uHand, cHand ): 
+    result = ''
     if uEval > cEval:
         print("User wins!", "you won: $", bet)
+        result = 'l'
     if cEval > uEval:
         print("CPU wins")
+        result = 'w'
     if cEval == uEval:            #check for high card
         #print('The match is a draw')
         if uHand[2] > cHand[2]:
             print("User wins from highest card\n", "you won: $", bet)
+            result = 'l'
         if uHand[2] < cHand[2]:
             print("CPU wins from highest card")
+            result = 'w'
         if uHand[2] == cHand[2]:
             print('The match is a draw')
-
+            result = 'd'
+    return result 
+            
         
 #returns relevant hand for better visualization at endgame
 def handAnalyze(eval, player, hand):
@@ -142,24 +149,88 @@ def handAnalyze(eval, player, hand):
             print(player ,"'s high card is: " , "King(13)")
         else:
             print(player ,"'s high card is: " , hand[2].rank)
+            
+'''the three functions below (checkRatio, checkProfit, checkHistory) will be used to determine if the cpu should cheat this round'''
+#checks win ratio, makes sure that win ratio does not drop
+#def checkWinRatio(wins, totalGames):
+    
+#checks profit, makes sure it does not go negative
+#def checkProfit(profit, totalGames):
+    
+#checks history of games, makes sure cpu is not winning over and over
+#def checkHistory(historicGames, totalGames):
 
+#cheat function will use a evalNeeded that is greater than opponent's eval score
+#evalNeeded should be a randomly selected number greater than opponents evaluation and less than or equal to 5 (highest evaluation)
+def cheat(hand, evalNeeded):
+  
+    c1 = hand[0]
+    c2 = hand[1]
+    c3 = hand[2]
+    if evalNeeded == 1: #creates pair
+        if (c1.suit != c2.suit):
+            c2.rank = int(c1.rank)
+        elif (c2.suit != c3.suit):
+            c3.rank = int(c2.rank)
+        elif (c1.suit != c3.suit):
+            c3.rank = int(c1.rank)
+    elif evalNeeded == 2: #creates flush using C1's suit
+        '''cannot have a pair here'''
+        c2.suit = c1.suit
+        c3.suit = c1.suit
+    elif evalNeeded == 3: #creates a straight
+        '''cannot be the same suit aka old evaluation number can not be 2''' 
+        if c1.rank <12:
+            c2.rank = int(c1.rank)+1  
+            c3.rank = int(c2.rank)+1
+        else:
+            c2.rank = int(c3.rank)-1  
+            c1.rank = int(c2.rank)-1
+    elif evalNeeded == 4: #creates a triple based off of C1's rank
+        '''cant have 2 of the same suit here'''
+        c2.rank = int(c1.rank)  
+        c3.rank = int(c1.rank)
+    elif evalNeeded == 5: #creates a straight flush
+        c2.suit = c1.suit
+        c3.suit = c1.suit
+        print("during cheat: \n")
+        printHand(cHand)
+        if c1.rank <12:
+            print("\nhere\n")
+            c2.rank = int(c1.rank)+1  
+            c3.rank = int(c2.rank)+1
+    return hand
+              
+    
 
 
 #create new card deck
 cardDeck = deck_of_cards.DeckOfCards()
 playing = True
 
+#initialize profit & win/loss/total game, & history variables for stat tracking
+profit = 0
+totalGames = 0
+cpuBet = 0 
+userBet = 0
+history = []
+
+
 #main game loop
 while playing == True:
     cardDeck.shuffle_deck() #resets the deck each game
     bet = 0
+    totalGames = totalGames+1
     #initial user bet
     print("Place a bet: ")
     bet = input()
+    userBet = int(bet)
     print('\n')
     if int(bet) != 0:
         print("CPU matches your bet")
+        cpuBet = int(bet)
         bet = int(bet) + int(bet)
+        
 
     #grab users cards, add to its hand
     uCard1 = cardDeck.give_first_card()
@@ -167,14 +238,35 @@ while playing == True:
     uCard3 = cardDeck.give_first_card()
     uHand = [uCard1, uCard2, uCard3]
     uHand = sortRank(uHand)
-    print("Your cards: ")
-    printHandHidden(uHand)
+    
     #grab CPU cards, add to its hand
     cCard1 = cardDeck.give_first_card()
     cCard2 = cardDeck.give_first_card()
     cCard3 = cardDeck.give_first_card()
     cHand = [cCard1, cCard2, cCard3]
     cHand = sortRank(cHand)
+    
+#NOTE= code below was modified to test cheat function- i will change this later  
+    #evaluate winner
+    uEval = evaluate(uHand)
+    cEval = evaluate(cHand)
+    print("ueval: ", uEval, "ceval: ", cEval)
+    
+    if (cEval<5):
+        print("before cheat: \n")
+        printHand(cHand)
+        cHand = cheat(cHand,5)
+        print("after cheat: \n") 
+        printHand(cHand)
+        
+    #evaluate again after AI
+    uHand = sortRank(uHand)
+    cHand = sortRank(cHand)
+    uEval = evaluate(uHand)
+    cEval = evaluate(cHand)
+    
+    print("Your cards: ")
+    printHandHidden(uHand)  
     print("----------")
     print("Dealer's cards: ")
     printHandHidden(cHand)
@@ -184,28 +276,35 @@ while playing == True:
     print("Place no additional bet or raise:(0 for none) ")
     betIn = input()
     bet = int(bet) + int(betIn)
-
+    userBet = userBet + int(betIn)
+  
     #cpu bets, matching/raising
-    compChoices = ['match', 'match', 'raise', 'raise' 'fold']     #weighting this with duplicates, probably a much better way to do this, using AI components
+    compChoices = ['match', 'match', 'raise', 'raise', 'fold']     #weighting this with duplicates, probably a much better way to do this, using AI components
     raiseChoices = [10, 50, 100, 200]
     choice = random.choice(compChoices)
     if choice == 'match':
+        cpuBet = cpuBet + int(betIn)
         bet = int(bet) + int(betIn)
         print('CPU matches your bet')
     if choice == 'fold':
             print('CPU folds, you win!')
+            gameResult = 'l'
     if choice == 'raise':
         raiseBet = random.choice(raiseChoices)
-        bet = int(bet) + raiseBet
+        cpuBet = cpuBet + int(betIn) + raiseBet
+        print("cpu bet = ",cpuBet)
+        bet = int(bet) + int(betIn) + raiseBet
         print("CPU has raised by ", raiseBet)
         print("----------\n", 'Current bet: ', bet, '\n---------' )
         print('You must match the CPU raise or fold(match or fold):' )
         usrIn = input()
         if str(usrIn) == 'match':
             bet = int(bet) + raiseBet
+            userBet = userBet + raiseBet 
             print("----------\n", 'Current bet: ', bet, '\n---------' )
         if str(usrIn) == 'fold':
             print('You fold, CPU has won')
+            gameResult = 'w'
 
     #print full hands (reveal 3rd card)
     print("Your cards: ")
@@ -215,13 +314,19 @@ while playing == True:
     printHand(cHand)
     print("----------\n", 'Current bet: ', bet, '\n---------' )
 
-    #evaluate winner
-    uEval = evaluate(uHand)
-    cEval = evaluate(cHand)
+
+        
     #print out hand values in string format, determine if need highest card
     handAnalyze(uEval, "User", uHand)
     handAnalyze(cEval, "CPU", cHand)
-    compareHands(uEval, cEval, bet, uHand, cHand)
+    gameResult = compareHands(uEval, cEval, bet, uHand, cHand)
+    history.append(gameResult)
+
+    #update stat tracking for wins, losses, & profit
+    if  gameResult == 'w':
+        profit = profit + userBet
+    elif gameResult == 'l':
+        profit = profit - cpuBet 
 
     #ask for another round or exit
     print("Play another round? (y/n) ")
