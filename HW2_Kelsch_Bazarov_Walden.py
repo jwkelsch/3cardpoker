@@ -10,18 +10,7 @@ import copy
 
 #sorts passed in hand in ascending rank
 def sortRank(hand):
-    c1 = hand[0]
-    c2 = hand[1]
-    c3 = hand[2]
-    if c1.rank > c2.rank:
-        hand[1] = c1
-        hand[0] = c2
-    if c2.rank > c3.rank:
-        hand[1] = c3
-        hand[2] = c2
-    if c1.rank > c3.rank:
-        hand[0] = c3
-        hand[2] = c1
+    hand.sort(key=lambda c: c.rank)
     return hand
 
 #takes a hand and prints 2 of the 3 cards with symbol format
@@ -217,7 +206,7 @@ history = []
 
 #main game loop
 while playing == True:
-    cardDeck.shuffle_deck() #resets the deck each game
+    cardDeck.reset_deck() #resets the deck each game
     bet = 0
     totalGames = totalGames+1
     #initial user bet
@@ -230,20 +219,20 @@ while playing == True:
         cpuBet = int(bet)
         bet = int(bet) + int(bet)
         
-
     #grab users cards, add to its hand
-    uCard1 = cardDeck.give_first_card()
-    uCard2 = cardDeck.give_first_card()
-    uCard3 = cardDeck.give_first_card()
+    uCard1 = cardDeck.give_random_card()
+    uCard2 = cardDeck.give_random_card()
+    uCard3 = cardDeck.give_random_card()
     uHand = [uCard1, uCard2, uCard3]
     uHand = sortRank(uHand)
     
     #grab CPU cards, add to its hand
-    cCard1 = cardDeck.give_first_card()
-    cCard2 = cardDeck.give_first_card()
-    cCard3 = cardDeck.give_first_card()
+    cCard1 = cardDeck.give_random_card()
+    cCard2 = cardDeck.give_random_card()
+    cCard3 = cardDeck.give_random_card()
     cHand = [cCard1, cCard2, cCard3]
     cHand = sortRank(cHand)
+
     
 #NOTE= code below was modified to test cheat function- i will change this later  
     #evaluate winner
