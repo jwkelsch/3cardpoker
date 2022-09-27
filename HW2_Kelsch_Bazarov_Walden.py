@@ -84,11 +84,11 @@ def evaluate(hand):
         evaluation = 1
     if c1.suit == c2.suit and c2.suit == c3.suit: #checking for flush
         evaluation = 2
-    if c1.rank == (c2.rank+1) and c2.rank == (c3.rank+1): #checking for straight
+    if c1.rank == (c2.rank-1) and c2.rank == (c3.rank-1): #checking for straight
         evaluation = 3
     if c1.rank == c2.rank and c2.rank == c3.rank: #checking for triple
         evaluation = 4
-    if c1.rank == (c2.rank+1) and c2.rank == (c3.rank+1) and c1.suit == c2.suit and c2.suit == c3.suit: #checking for straight flush
+    if c1.rank == (c2.rank-1) and c2.rank == (c3.rank-1) and c1.suit == c2.suit and c2.suit == c3.suit: #checking for straight flush
         evaluation = 5
     return evaluation
 
@@ -141,18 +141,31 @@ def handAnalyze(eval, player, hand):
             
 '''the three functions below (checkRatio, checkProfit, checkHistory) will be used to determine if the cpu should cheat this round'''
 #checks win ratio, makes sure that win ratio does not drop
-#def checkWinRatio(wins, totalGames):
+def checkWinRatio(history, totalGames):
+    cheat = False 
+    winRatio = history.count('w')/totalGames
+    if len(history)>4 and winRatio < .60:
+        cheat = True
+    return cheat
     
 #checks profit, makes sure it does not go negative
-#def checkProfit(profit, totalGames):
+def checkProfit(profit, totalGames):
+    cheat = False 
+    if len(history)>4 and profit<0: 
+        cheat = True
+    return cheat
     
 #checks history of games, makes sure cpu is not winning over and over
-#def checkHistory(historicGames, totalGames):
+def checkHistory(history, totalGames):
+    cheat = False
+    if len(history)>4:
+        if not(history[len(history)-1]=='w' and history[len(history)-2]=='w' and history[len(history)-3]=='w'):
+            cheat = True
+    return cheat
 
 #cheat function will use a evalNeeded that is greater than opponent's eval score
 #evalNeeded should be a randomly selected number greater than opponents evaluation and less than or equal to 5 (highest evaluation)
 def cheat(hand, evalNeeded):
-  
     c1 = hand[0]
     c2 = hand[1]
     c3 = hand[2]
@@ -189,12 +202,11 @@ def cheat(hand, evalNeeded):
             c3.rank = copy.deepcopy(int(c2.rank))+1
     return hand
               
-    
-
 
 #create new card deck
 cardDeck = deck_of_cards.DeckOfCards()
 playing = True
+
 
 #initialize profit & win/loss/total game, & history variables for stat tracking
 profit = 0
@@ -206,6 +218,7 @@ history = []
 
 #main game loop
 while playing == True:
+    winnerDeclared = False
     cardDeck.reset_deck() #resets the deck each game
     bet = 0
     totalGames = totalGames+1
@@ -238,12 +251,11 @@ while playing == True:
     #evaluate winner
     uEval = evaluate(uHand)
     cEval = evaluate(cHand)
-    print("ueval: ", uEval, "ceval: ", cEval)
     
     if (cEval<5):
         print("before cheat: \n")
         printHand(cHand)
-        cHand = cheat(cHand,5)
+        cHand = cheat(cHand,3)
         print("after cheat: \n") 
         printHand(cHand)
         
@@ -277,10 +289,10 @@ while playing == True:
     if choice == 'fold':
             print('CPU folds, you win!')
             gameResult = 'l'
+            winnerDeclared = True
     if choice == 'raise':
         raiseBet = random.choice(raiseChoices)
         cpuBet = cpuBet + int(betIn) + raiseBet
-        print("cpu bet = ",cpuBet)
         bet = int(bet) + int(betIn) + raiseBet
         print("CPU has raised by ", raiseBet)
         print("----------\n", 'Current bet: ', bet, '\n---------' )
@@ -293,6 +305,7 @@ while playing == True:
         if str(usrIn) == 'fold':
             print('You fold, CPU has won')
             gameResult = 'w'
+            winnerDeclared = True
 
     #print full hands (reveal 3rd card)
     print("Your cards: ")
@@ -307,7 +320,8 @@ while playing == True:
     #print out hand values in string format, determine if need highest card
     handAnalyze(uEval, "User", uHand)
     handAnalyze(cEval, "CPU", cHand)
-    gameResult = compareHands(uEval, cEval, bet, uHand, cHand)
+    if winnerDeclared == False:
+        gameResult = compareHands(uEval, cEval, bet, uHand, cHand)
     history.append(gameResult)
 
     #update stat tracking for wins, losses, & profit
@@ -316,6 +330,8 @@ while playing == True:
     elif gameResult == 'l':
         profit = profit - cpuBet 
 
+    print("\nlength of history: ", len(history))
+    print("\ntotal games: ", len(history))
     #ask for another round or exit
     print("Play another round? (y/n) ")
     again = input()
