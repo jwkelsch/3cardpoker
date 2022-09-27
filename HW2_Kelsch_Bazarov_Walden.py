@@ -5,6 +5,7 @@
 from deck_of_cards import deck_of_cards
 import random
 import copy
+import math
 #card.suit   0=spades, 1=hearts, 2=diamonds, 3=clubs
 #card.rank   1=Ace, 11=Jack, 12=Queen, 13=King - 2-10 are just numerical cards
 
@@ -141,24 +142,25 @@ def handAnalyze(eval, player, hand):
             
 '''the three functions below (checkRatio, checkProfit, checkHistory) will be used to determine if the cpu should cheat this round'''
 #checks win ratio, makes sure that win ratio does not drop
-def checkWinRatio(history, totalGames):
+def checkWinRatio(history):
     cheat = False 
-    winRatio = history.count('w')/totalGames
-    if len(history)>4 and winRatio < .60:
-        cheat = True
+    if len(history) >=4:
+        winRatio = history.count('w') / len(history)
+        if  winRatio < .60:
+            cheat = True
     return cheat
     
 #checks profit, makes sure it does not go negative
-def checkProfit(profit, totalGames):
+def checkProfit(profit, history):
     cheat = False 
-    if len(history)>4 and profit<0: 
+    if len(history)>=4 and profit<0:
         cheat = True
     return cheat
     
 #checks history of games, makes sure cpu is not winning over and over
-def checkHistory(history, totalGames):
+def checkHistory(history):
     cheat = False
-    if len(history)>4:
+    if len(history)>=4:
         if not(history[len(history)-1]=='w' and history[len(history)-2]=='w' and history[len(history)-3]=='w'):
             cheat = True
     return cheat
@@ -226,6 +228,7 @@ history = []
 #main game loop
 while playing == True:
     winnerDeclared = False
+    cheatingBoolean = False
     cardDeck.reset_deck() #resets the deck each game
     bet = 0
     totalGames = totalGames+1
@@ -259,9 +262,10 @@ while playing == True:
     uEval = evaluate(uHand)
     cEval = evaluate(cHand)
 
-    if cEval< uEval:
-        print( len(history))
-        if (checkWinRatio==True)or(checkProfit==True)or(checkHistory==True):
+ #   if cEval< uEval:
+ #   print( len(history))
+    if ((checkWinRatio(history)==True)or(checkProfit(profit, history)==True))and(checkHistory(history)==True):
+            cheatingBoolean = True
             print("cheating")
             if uEval!=5:
                 randEvalNeeded = random.randint(uEval+1,5)
@@ -287,35 +291,103 @@ while playing == True:
     betIn = input()
     bet = int(bet) + int(betIn)
     userBet = userBet + int(betIn)
-  
-    #cpu bets, matching/raising
-    compChoices = ['raise', 'raise', 'raise', 'raise', 'raise']     #weighting this with duplicates, probably a much better way to do this, using AI components
-    raiseChoices = [10, 50, 100, 200]
-    choice = random.choice(compChoices)
-    if choice == 'match':
-        cpuBet = cpuBet + int(betIn)
-        bet = int(bet) + int(betIn)
-        print('CPU matches your bet')
-    if choice == 'fold':
+
+    #if the AI is cheating, following will be executed for raising/matching
+    #if the AI is cheating, it would not 'fold'
+    if(cheatingBoolean == True):    #if the AI is cheating
+        if(cEval==1):   #if the Evaluation/CPU's hand has a pair
+            compChoices=['match','raiseFirstOption']  #it can either match or raise, 2 options total
+            raiseChoices = [1.20, 1.40] #raiseFirstOption is raising only 20% or 40% from the bet
+            choice = random.choice(compChoices)
+            if choice == "match":
+                cpuBet = cpuBet + int(betIn)
+                bet = int(bet) + int(betIn)
+                print('CPU matches your bet')
+            if choice == "raiseFirstOption":
+                raiseBet = random.choice(raiseChoices)*bet # raiseBet is (random % from 20% or 40%) * (the bet)
+                roundedRaiseBet = int(round(raiseBet,-2)) #rounding the raise bet to nearest 100 number and casting as integer
+                cpuBet = cpuBet + int(betIn) + roundedRaiseBet
+                bet = int(bet) + int(betIn) + roundedRaiseBet
+                print("CPU has raised by ", roundedRaiseBet)
+                print("----------\n", 'Current bet: ', bet, '\n---------')
+                print('You must match the CPU raise or fold(match or fold):')
+                usrIn = input()
+                if str(usrIn) == 'match':
+                    bet = int(bet) + roundedRaiseBet
+                    userBet = userBet + roundedRaiseBet
+                    print("----------\n", 'Current bet: ', bet, '\n---------')
+                if str(usrIn) == 'fold':
+                    print('You fold, CPU has won')
+                    gameResult = 'w'
+                    winnerDeclared = True
+        if(cEval==2 or cEval==3): #if the Evaluation/CPU's hand has a FLUSH or STRAIGHT
+            choice="raiseSecondOption"     #raising 50% or 60% or 70% of the bet
+            raiseChoices= [1.50, 1.60, 1.70]
+            raiseBet = random.choice(raiseChoices)*bet #raiseBet is (random % from 50,60 or 70) * (the bet)
+            roundedRaiseBet = int(round(raiseBet, -2)) #rounding the raise bet to nearest 100 number and casting as integer
+            cpuBet = cpuBet + int(betIn) + roundedRaiseBet
+            bet = int(bet) + int(betIn) + roundedRaiseBet
+            print("CPU has raised by ", roundedRaiseBet)
+            print("----------\n", 'Current bet: ', bet, '\n---------')
+            print('You must match the CPU raise or fold(match or fold):')
+            usrIn = input()
+            if str(usrIn) == 'match':
+                bet = int(bet) + roundedRaiseBet
+                userBet = userBet + roundedRaiseBet
+                print("----------\n", 'Current bet: ', bet, '\n---------')
+            if str(usrIn) == 'fold':
+                print('You fold, CPU has won')
+                gameResult = 'w'
+                winnerDeclared = True
+        if(cEval==4 or cEval == 5):  #if the Evaluation/CPU's hand has TRIPPLE or STRAIGHT-FLUSH
+            choice="raiseThirdOption"    #raising 80% or 90% or 100% of the bet
+            raiseChoices = [1.80, 1.90, 2]
+            raiseBet = random.choice(raiseChoices)*bet # raiseBet is (random % from 80, 90 or 100) * (the bet)
+            roundedRaiseBet = int(round(raiseBet, -2))  # rounding the raise bet to nearest 100 number and casting as integer
+            cpuBet = cpuBet + int(betIn) + roundedRaiseBet
+            bet = int(bet) + int(betIn) + roundedRaiseBet
+            print("CPU has raised by ", roundedRaiseBet)
+            print("----------\n", 'Current bet: ', bet, '\n---------')
+            print('You must match the CPU raise or fold(match or fold):')
+            usrIn = input()
+            if str(usrIn) == 'match':
+                bet = int(bet) + roundedRaiseBet
+                userBet = userBet + roundedRaiseBet
+                print("----------\n", 'Current bet: ', bet, '\n---------')
+            if str(usrIn) == 'fold':
+                print('You fold, CPU has won')
+                gameResult = 'w'
+                winnerDeclared = True
+
+    if (cheatingBoolean == False):              #IF we are NOT cheating, then the CPU decides to raise or match randomly
+        #cpu bets, matching/raising
+        compChoices = ['raise', 'match', 'raise', 'match', 'fold']
+        raiseChoices = [10, 50, 100, 200]   #CPU decides randomly between these amounts, how much to raise
+        choice = random.choice(compChoices)
+        if choice == 'match':
+            cpuBet = cpuBet + int(betIn)
+            bet = int(bet) + int(betIn)
+            print('CPU matches your bet')
+        if choice == 'fold':
             print('CPU folds, you win!')
             gameResult = 'l'
             winnerDeclared = True
-    if choice == 'raise':
-        raiseBet = random.choice(raiseChoices)
-        cpuBet = cpuBet + int(betIn) + raiseBet
-        bet = int(bet) + int(betIn) + raiseBet
-        print("CPU has raised by ", raiseBet)
-        print("----------\n", 'Current bet: ', bet, '\n---------' )
-        print('You must match the CPU raise or fold(match or fold):' )
-        usrIn = input()
-        if str(usrIn) == 'match':
-            bet = int(bet) + raiseBet
-            userBet = userBet + raiseBet 
+        if choice == 'raise':
+            raiseBet = random.choice(raiseChoices)
+            cpuBet = cpuBet + int(betIn) + raiseBet
+            bet = int(bet) + int(betIn) + raiseBet
+            print("CPU has raised by ", raiseBet)
             print("----------\n", 'Current bet: ', bet, '\n---------' )
-        if str(usrIn) == 'fold':
-            print('You fold, CPU has won')
-            gameResult = 'w'
-            winnerDeclared = True
+            print('You must match the CPU raise or fold(match or fold):' )
+            usrIn = input()
+            if str(usrIn) == 'match':
+                bet = int(bet) + raiseBet
+                userBet = userBet + raiseBet
+                print("----------\n", 'Current bet: ', bet, '\n---------' )
+            if str(usrIn) == 'fold':
+                print('You fold, CPU has won')
+                gameResult = 'w'
+                winnerDeclared = True
 
     #print full hands (reveal 3rd card)
     print("Your cards: ")
@@ -341,8 +413,11 @@ while playing == True:
     elif gameResult == 'l':
         profit = profit - cpuBet 
 
+    print("Total games played: " + str(totalGames))
+    print("\nCPU Stats: " + "\nTotal Profit/Loss amount: " + str(profit))
+    print("\nHistory of Wins/Losses: " + str(history))
     #ask for another round or exit
-    print("Play another round? (y/n) ")
+    print("\nPlay another round? (y/n) ")
     again = input()
     if again == 'n':
         playing = False
