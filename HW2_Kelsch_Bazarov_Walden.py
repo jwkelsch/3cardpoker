@@ -186,8 +186,8 @@ def cheat(hand, evalNeeded):
             c2.rank = copy.deepcopy(int(c1.rank))+1
             c3.rank = copy.deepcopy(int(c2.rank))+1
         else:
-            c2.rank = int(c3.rank)-1  
-            c1.rank = int(c2.rank)-1
+            c2.rank = copy.deepcopy(int(c3.rank))-1
+            c1.rank = copy.deepcopy(int(c2.rank))-1
     elif evalNeeded == 4: #creates a triple based off of C1's rank
         '''cant have 2 of the same suit here'''
         c2.rank = int(c1.rank)  
@@ -195,11 +195,18 @@ def cheat(hand, evalNeeded):
     elif evalNeeded == 5: #creates a straight flush
         c2.suit = c1.suit
         c3.suit = c1.suit
-        print("during cheat: \n")
-        printHand(cHand)
         if c1.rank <12:
             c2.rank = copy.deepcopy(int(c1.rank))+1
             c3.rank = copy.deepcopy(int(c2.rank))+1
+        else:
+            c2.rank = copy.deepcopy(int(c3.rank))-1
+            c1.rank = copy.deepcopy(int(c2.rank))-1
+    elif evalNeeded == 6: #creates a straight flush using highest card
+        c2.suit = c1.suit
+        c3.suit = c1.suit
+        if c3.rank >2:
+            c2.rank = copy.deepcopy(int(c3.rank))-1
+            c1.rank = copy.deepcopy(int(c2.rank))-1
     return hand
               
 
@@ -247,17 +254,20 @@ while playing == True:
     cHand = sortRank(cHand)
 
     
-#NOTE= code below was modified to test cheat function- i will change this later  
-    #evaluate winner
+#NOTE= code below was modified to test cheat function- i will change this later
+    #evaluate winner before cheating
     uEval = evaluate(uHand)
     cEval = evaluate(cHand)
-    
-    if (cEval<5):
-        print("before cheat: \n")
-        printHand(cHand)
-        cHand = cheat(cHand,3)
-        print("after cheat: \n") 
-        printHand(cHand)
+
+    if cEval< uEval:
+        print( len(history))
+        if (checkWinRatio==True)or(checkProfit==True)or(checkHistory==True):
+            print("cheating")
+            if uEval!=5:
+                randEvalNeeded = random.randint(uEval+1,5)
+                cHand = cheat(cHand,randEvalNeeded)
+            if uEval ==5:
+                cHand = cheat(cHand,6) 
         
     #evaluate again after AI
     uHand = sortRank(uHand)
@@ -279,7 +289,7 @@ while playing == True:
     userBet = userBet + int(betIn)
   
     #cpu bets, matching/raising
-    compChoices = ['match', 'match', 'raise', 'raise', 'fold']     #weighting this with duplicates, probably a much better way to do this, using AI components
+    compChoices = ['raise', 'raise', 'raise', 'raise', 'raise']     #weighting this with duplicates, probably a much better way to do this, using AI components
     raiseChoices = [10, 50, 100, 200]
     choice = random.choice(compChoices)
     if choice == 'match':
@@ -320,6 +330,7 @@ while playing == True:
     #print out hand values in string format, determine if need highest card
     handAnalyze(uEval, "User", uHand)
     handAnalyze(cEval, "CPU", cHand)
+
     if winnerDeclared == False:
         gameResult = compareHands(uEval, cEval, bet, uHand, cHand)
     history.append(gameResult)
@@ -330,8 +341,6 @@ while playing == True:
     elif gameResult == 'l':
         profit = profit - cpuBet 
 
-    print("\nlength of history: ", len(history))
-    print("\ntotal games: ", len(history))
     #ask for another round or exit
     print("Play another round? (y/n) ")
     again = input()
