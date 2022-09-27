@@ -4,7 +4,7 @@
 #install using:    pip install deck-of-cards
 from deck_of_cards import deck_of_cards
 import random
-
+import copy
 #card.suit   0=spades, 1=hearts, 2=diamonds, 3=clubs
 #card.rank   1=Ace, 11=Jack, 12=Queen, 13=King - 2-10 are just numerical cards
 
@@ -181,8 +181,8 @@ def cheat(hand, evalNeeded):
     elif evalNeeded == 3: #creates a straight
         '''cannot be the same suit aka old evaluation number can not be 2''' 
         if c1.rank <12:
-            c2.rank = int(c1.rank)+1  
-            c3.rank = int(c2.rank)+1
+            c2.rank = copy.deepcopy(int(c1.rank))+1
+            c3.rank = copy.deepcopy(int(c2.rank))+1
         else:
             c2.rank = int(c3.rank)-1  
             c1.rank = int(c2.rank)-1
@@ -196,9 +196,8 @@ def cheat(hand, evalNeeded):
         print("during cheat: \n")
         printHand(cHand)
         if c1.rank <12:
-            print("\nhere\n")
-            c2.rank = int(c1.rank)+1  
-            c3.rank = int(c2.rank)+1
+            c2.rank = copy.deepcopy(int(c1.rank))+1
+            c3.rank = copy.deepcopy(int(c2.rank))+1
     return hand
               
     
