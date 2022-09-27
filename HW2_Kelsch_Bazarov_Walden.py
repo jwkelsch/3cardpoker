@@ -4,6 +4,7 @@
 #install using:    pip install deck-of-cards
 from deck_of_cards import deck_of_cards
 import random
+from random import sample
 import copy
 import math
 #card.suit   0=spades, 1=hearts, 2=diamonds, 3=clubs
@@ -12,6 +13,18 @@ import math
 #sorts passed in hand in ascending rank
 def sortRank(hand):
     hand.sort(key=lambda c: c.rank)
+    return hand
+
+#randomizes locations of cards in a hand - used to not hint at 3rd card when printing hidden
+def randHandIndices(hand):
+    c1 = hand[0]
+    c2 = hand[1]
+    c3 = hand[2]
+    indices = [0, 1, 2]
+    randIndices = sample(indices, 3) #sample() takes x(3) distinct random values from an array
+    hand[randIndices[0]] = c1
+    hand[randIndices[1]] = c2
+    hand[randIndices[2]] = c3
     return hand
 
 #takes a hand and prints 2 of the 3 cards with symbol format
@@ -278,6 +291,10 @@ while playing == True:
     cHand = sortRank(cHand)
     uEval = evaluate(uHand)
     cEval = evaluate(cHand)
+
+    #randomize card locations to not spoil 3rd card (non ascending order)
+    uHand = randHandIndices(uHand)
+    cHand = randHandIndices(cHand)
     
     print("Your cards: ")
     printHandHidden(uHand)  
@@ -285,6 +302,10 @@ while playing == True:
     print("Dealer's cards: ")
     printHandHidden(cHand)
     print("----------\n", 'Current bet: ', bet, '\n---------' )
+
+    #re-sort hands for final print
+    uHand = sortRank(uHand)
+    cHand = sortRank(cHand)
 
     #second round of betting
     print("Place no additional bet or raise:(0 for none) ")
