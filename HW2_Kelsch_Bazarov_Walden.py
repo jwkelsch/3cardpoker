@@ -43,7 +43,7 @@ def printHandHidden(hand):
     count = 0
     for x in hand:
         if count == 2:
-            print('[ hidden ]')
+            print('\t[ hidden ]')
             return
         if x.suit == 0:
             x.suit = '♠'
@@ -54,22 +54,22 @@ def printHandHidden(hand):
         if x.suit == 3:
             x.suit = '♣'
         if x.rank == 1:
-            print('[', 'Ace',  x.suit, ']')
+            print('\t[', 'Ace',  x.suit, ']')
             count+=1
             continue
         if x.rank == 11:
-            print('[', 'Jack',  x.suit, ']')
+            print('\t[', 'Jack',  x.suit, ']')
             count+=1
             continue
         if x.rank == 12:
-            print('[', 'Queen',  x.suit, ']')
+            print('\t[', 'Queen',  x.suit, ']')
             count+=1
             continue
         if x.rank == 13:
-            print('[', 'King',  x.suit, ']')
+            print('\t[', 'King',  x.suit, ']')
             count+=1
             continue
-        print('[', x.rank,  x.suit, ']')
+        print('\t[', x.rank,  x.suit, ']')
         count+=1
 
 #takes a hand and prints all cards with symbol format
@@ -85,18 +85,18 @@ def printHand(hand):
         if x.suit == 3:
             x.suit = '♣'
         if x.rank == 1:
-            print('[', 'Ace',  x.suit, ']')
+            print('\t[', 'Ace',  x.suit, ']')
             continue
         if x.rank == 11:
-            print('[', 'Jack',  x.suit, ']')
+            print('\t[', 'Jack',  x.suit, ']')
             continue
         if x.rank == 12:
-            print('[', 'Queen',  x.suit, ']')
+            print('\t[', 'Queen',  x.suit, ']')
             continue
         if x.rank == 13:
-            print('[', 'King',  x.suit, ']')
+            print('\t[', 'King',  x.suit, ']')
             continue
-        print('[', x.rank,  x.suit, ']')
+        print('\t[', x.rank,  x.suit, ']')
 
 #takes a hand and evaluates the value (weak or strong)
 def evaluate(hand):
@@ -120,21 +120,21 @@ def evaluate(hand):
 def compareHands(uEval, cEval, bet, uHand, cHand ): 
     result = ''
     if uEval > cEval:
-        print("User wins!", "you won: $", bet)
+        print("\n\tUser wins!", "\n\tYou won: $", bet, '\n')
         result = 'l'
     if cEval > uEval:
-        print("CPU wins")
+        print("\n\tCPU wins\n")
         result = 'w'
     if cEval == uEval:            #check for high card
         #print('The match is a draw')
         if uHand[2] > cHand[2]:
-            print("User wins from highest card\n", "you won: $", bet)
+            print("\n\tUser wins from highest card", "\n\tYou won: $", bet, '\n')
             result = 'l'
         if uHand[2] < cHand[2]:
-            print("CPU wins from highest card")
+            print("\n\tCPU wins from highest card\n")
             result = 'w'
         if uHand[2] == cHand[2]:
-            print('The match is a draw')
+            print('\n\tThe match is a draw\n')
             result = 'd'
     return result 
             
@@ -247,7 +247,7 @@ cpuBet = 0
 userBet = 0
 history = []
 
-
+print('\n\tWELCOME! Good Luck!')
 #main game loop
 while playing == True:
     winnerDeclared = False
@@ -255,6 +255,7 @@ while playing == True:
     cardDeck.reset_deck() #resets the deck each game
     bet = 0
     totalGames = totalGames+1
+    print('\t ROUND NUMBER', totalGames, '\n')
     #initial user bet
     print("Place a bet: ")
     bet = input()
@@ -304,12 +305,12 @@ while playing == True:
     uHand = randHandIndices(uHand)
     cHand = randHandIndices(cHand)
     
-    print("Your cards: ")
+    print("\n\tYour cards: ")
     printHandHidden(uHand)  
-    print("----------")
-    print("Dealer's cards: ")
+    print("\t----------")
+    print("\tDealer's cards: ")
     printHandHidden(cHand)
-    print("----------\n", 'Current bet: ', bet, '\n---------' )
+    print("\t----------\n",'\tCurrent bet: ', bet, '\n\t----------\n' )
 
     #re-sort hands for final print
     uHand = sortRank(uHand)
@@ -338,15 +339,15 @@ while playing == True:
                 cpuBet = cpuBet + int(betIn) + roundedRaiseBet
                 bet = int(bet) + int(betIn) + roundedRaiseBet
                 print("CPU has raised by ", roundedRaiseBet)
-                print("----------\n", 'Current bet: ', bet, '\n---------')
+                print("\n\t----------\n",'\tCurrent bet: ', bet, '\n\t----------\n' )
                 print('You must match the CPU raise or fold(match or fold):')
                 usrIn = input()
                 if str(usrIn) == 'match':
                     bet = int(bet) + roundedRaiseBet
                     userBet = userBet + roundedRaiseBet
-                    print("----------\n", 'Current bet: ', bet, '\n---------')
+                    print("\n\t----------\n",'\tCurrent bet: ', bet, '\n\t----------\n' )
                 if str(usrIn) == 'fold':
-                    print('You fold, CPU has won')
+                    print('\n\tYou fold, CPU has won\n')
                     gameResult = 'w'
                     winnerDeclared = True
         if(cEval==2 or cEval==3): #if the Evaluation/CPU's hand has a FLUSH or STRAIGHT
@@ -357,15 +358,15 @@ while playing == True:
             cpuBet = cpuBet + int(betIn) + roundedRaiseBet
             bet = int(bet) + int(betIn) + roundedRaiseBet
             print("CPU has raised by ", roundedRaiseBet)
-            print("----------\n", 'Current bet: ', bet, '\n---------')
+            print("\n\t----------\n",'\tCurrent bet: ', bet, '\n\t----------\n' )
             print('You must match the CPU raise or fold(match or fold):')
             usrIn = input()
             if str(usrIn) == 'match':
                 bet = int(bet) + roundedRaiseBet
                 userBet = userBet + roundedRaiseBet
-                print("----------\n", 'Current bet: ', bet, '\n---------')
+                print("\n\t----------\n",'\tCurrent bet: ', bet, '\n\t----------\n' )
             if str(usrIn) == 'fold':
-                print('You fold, CPU has won')
+                print('\n\tYou fold, CPU has won\n')
                 gameResult = 'w'
                 winnerDeclared = True
         if(cEval==4 or cEval == 5):  #if the Evaluation/CPU's hand has TRIPPLE or STRAIGHT-FLUSH
@@ -376,15 +377,15 @@ while playing == True:
             cpuBet = cpuBet + int(betIn) + roundedRaiseBet
             bet = int(bet) + int(betIn) + roundedRaiseBet
             print("CPU has raised by ", roundedRaiseBet)
-            print("----------\n", 'Current bet: ', bet, '\n---------')
+            print("\n\t----------\n",'\tCurrent bet: ', bet, '\n\t----------\n' )
             print('You must match the CPU raise or fold(match or fold):')
             usrIn = input()
             if str(usrIn) == 'match':
                 bet = int(bet) + roundedRaiseBet
                 userBet = userBet + roundedRaiseBet
-                print("----------\n", 'Current bet: ', bet, '\n---------')
+                print("\n\t----------\n",'\tCurrent bet: ', bet, '\n\t----------\n' )
             if str(usrIn) == 'fold':
-                print('You fold, CPU has won')
+                print('\n\tYou fold, CPU has won\n')
                 gameResult = 'w'
                 winnerDeclared = True
 
@@ -398,7 +399,7 @@ while playing == True:
             bet = int(bet) + int(betIn)
             print('CPU matches your bet')
         if choice == 'fold':
-            print('CPU folds, you win!')
+            print('\n\tCPU folds, you win!',"\n\tYou won: $", bet, '\n')
             gameResult = 'l'
             winnerDeclared = True
         if choice == 'raise':
@@ -406,25 +407,25 @@ while playing == True:
             cpuBet = cpuBet + int(betIn) + raiseBet
             bet = int(bet) + int(betIn) + raiseBet
             print("CPU has raised by ", raiseBet)
-            print("----------\n", 'Current bet: ', bet, '\n---------' )
+            print("\n\t----------\n",'\tCurrent bet: ', bet, '\n\t----------\n' )
             print('You must match the CPU raise or fold(match or fold):' )
             usrIn = input()
             if str(usrIn) == 'match':
                 bet = int(bet) + raiseBet
                 userBet = userBet + raiseBet
-                print("----------\n", 'Current bet: ', bet, '\n---------' )
+                print("\n\t----------\n",'\tCurrent bet: ', bet, '\n\t----------\n' )
             if str(usrIn) == 'fold':
-                print('You fold, CPU has won')
+                print('\n\tYou fold, CPU has won\n')
                 gameResult = 'w'
                 winnerDeclared = True
 
     #print full hands (reveal 3rd card)
-    print("Your cards: ")
+    print("\n\tYour cards: ")
     printHand(uHand)
-    print("----------")
-    print("Dealer's cards: ")
+    print("\t----------")
+    print("\tDealer's cards: ")
     printHand(cHand)
-    print("----------\n", 'Current bet: ', bet, '\n---------' )
+    print("\t----------\n",'\tCurrent bet: ', bet, '\n\t----------\n' )
 
 
         
