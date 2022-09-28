@@ -1,3 +1,14 @@
+#Written by: Zarrukh Bazarov, Jackson Kelsch, and Emily Walden 
+#CSCE 480- Intro to AI - Homework 2: Cheating Casino
+#Program Purpose: Uses AI methods to cheat in 3-card poker to generate positive revenue over time
+#Program Assumptions: 
+#   1)Player will play more than 4 rounds, which allows the AI to observe game 
+#     stats and then start cheating.
+#   2)Different “users” would play over the long run to add to the profit & stats over time.
+#   3)Computer has unlimited wallet of funds. 
+#   4)Profit is calculated only using gains from the user, not including money 
+#     the cpu bet and gained back. 
+#   5)Aces are used as low aces.
 
 # https://pypi.org/project/deck-of-cards/
 # ^ deck of cards import docs
@@ -6,7 +17,6 @@ from deck_of_cards import deck_of_cards
 import random
 from random import sample
 import copy
-import math
 #card.suit   0=spades, 1=hearts, 2=diamonds, 3=clubs
 #card.rank   1=Ace, 11=Jack, 12=Queen, 13=King - 2-10 are just numerical cards
 
@@ -154,7 +164,7 @@ def handAnalyze(eval, player, hand):
             print(player ,"'s high card is: " , hand[2].rank)
             
 '''the three functions below (checkRatio, checkProfit, checkHistory) will be used to determine if the cpu should cheat this round'''
-#checks win ratio, makes sure that win ratio does not drop
+#checks win ratio, makes sure that win ratio does not drop below 60%
 def checkWinRatio(history):
     cheat = False 
     if len(history) >=4:
@@ -275,16 +285,14 @@ while playing == True:
     uEval = evaluate(uHand)
     cEval = evaluate(cHand)
 
- #   if cEval< uEval:
- #   print( len(history))
+    #determining if the cpu should cheat to win the game. then calls the cheat function if the conditions are met. 
     if ((checkWinRatio(history)==True)or(checkProfit(profit, history)==True))and(checkHistory(history)==True):
             cheatingBoolean = True
-            print("cheating")
             if uEval!=5:
-                randEvalNeeded = random.randint(uEval+1,5)
+                randEvalNeeded = random.randint(uEval+1,5) #randomized evaluation that is used to create a higher ranking hand than the user's
                 cHand = cheat(cHand,randEvalNeeded)
             if uEval ==5:
-                cHand = cheat(cHand,6) 
+                cHand = cheat(cHand,6) #if the user has a straight flush (highest rank) then the highest card the cpu has is used to create a high straight flush
         
     #evaluate again after AI
     uHand = sortRank(uHand)
@@ -424,11 +432,11 @@ while playing == True:
     handAnalyze(uEval, "User", uHand)
     handAnalyze(cEval, "CPU", cHand)
 
-    if winnerDeclared == False:
+    #update stat tracking for wins & losses 
+    if winnerDeclared == False: #if winnerdeclared is true, that means user or cpu folded
         gameResult = compareHands(uEval, cEval, bet, uHand, cHand)
     history.append(gameResult)
-
-    #update stat tracking for wins, losses, & profit
+    #update stat tracking for profit
     if  gameResult == 'w':
         profit = profit + userBet
     elif gameResult == 'l':
