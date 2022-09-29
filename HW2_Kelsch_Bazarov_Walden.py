@@ -201,23 +201,32 @@ def cheat(hand, evalNeeded):
             c3.rank = int(c2.rank)
         elif (c1.suit != c3.suit):
             c3.rank = int(c1.rank)
-    elif evalNeeded == 2: #creates flush using C1's suit
+    if evalNeeded == 2: #creates flush using C1's suit
         '''cannot have a pair here'''
-        c2.suit = c1.suit
-        c3.suit = c1.suit
-    elif evalNeeded == 3: #creates a straight
+        if c1.rank == c2.rank or c1.rank == c3.rank or c2.rank == c3.rank:
+            evalNeeded = random.randint(3,5)
+        else:
+            c2.suit = c1.suit
+            c3.suit = c1.suit
+    if evalNeeded == 3: #creates a straight
         '''cannot be the same suit aka old evaluation number can not be 2''' 
-        if c1.rank <12:
-            c2.rank = copy.deepcopy(int(c1.rank))+1
-            c3.rank = copy.deepcopy(int(c2.rank))+1
+        if c1.suit == c2.suit and c2.suit == c3.suit:
+            evalNeeded = 5
         else:
-            c2.rank = copy.deepcopy(int(c3.rank))-1
-            c1.rank = copy.deepcopy(int(c2.rank))-1
-    elif evalNeeded == 4: #creates a triple based off of C1's rank
+            if c1.rank <12:
+                c2.rank = copy.deepcopy(int(c1.rank))+1
+                c3.rank = copy.deepcopy(int(c2.rank))+1
+            else:
+                c2.rank = copy.deepcopy(int(c3.rank))-1
+                c1.rank = copy.deepcopy(int(c2.rank))-1
+    if evalNeeded == 4: #creates a triple based off of C1's rank
         '''cant have 2 of the same suit here'''
-        c2.rank = int(c1.rank)  
-        c3.rank = int(c1.rank)
-    elif evalNeeded == 5: #creates a straight flush
+        if (c1.suit == c2.suit)or(c2.suit == c3.suit):
+            evalNeeded=5
+        else:
+            c2.rank = int(c1.rank)  
+            c3.rank = int(c1.rank)
+    if evalNeeded == 5: #creates a straight flush
         c2.suit = c1.suit
         c3.suit = c1.suit
         if c1.rank <12:
@@ -226,12 +235,15 @@ def cheat(hand, evalNeeded):
         else:
             c2.rank = copy.deepcopy(int(c3.rank))-1
             c1.rank = copy.deepcopy(int(c2.rank))-1
-    elif evalNeeded == 6: #creates a straight flush using highest card
+    if evalNeeded == 6: #creates a straight flush using highest card if possible 
         c2.suit = c1.suit
         c3.suit = c1.suit
         if c3.rank >2:
             c2.rank = copy.deepcopy(int(c3.rank))-1
             c1.rank = copy.deepcopy(int(c2.rank))-1
+        else:
+            c2.rank = copy.deepcopy(int(c1.rank))+1
+            c3.rank = copy.deepcopy(int(c2.rank))+1
     return hand
               
 
@@ -445,10 +457,15 @@ while playing == True:
 
     print("Total games played: " + str(totalGames))
     print("\nCPU Stats: " + "\nTotal Profit/Loss amount: " + str(profit))
-    print("History of Wins/Losses: " + str(history))
+    print("\nHistory of Wins/Losses: " + str(history))
     #ask for another round or exit
     print("\nPlay another round? (y/n) ")
     again = input()
     if again == 'n':
         playing = False
 
+
+    #for x in uHand:
+    #    print(x.name)
+    #for x in cHand:
+    #    print(x.name)
