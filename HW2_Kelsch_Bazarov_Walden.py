@@ -457,15 +457,10 @@ while playing == True:
 
     print("Total games played: " + str(totalGames))
     print("\nCPU Stats: " + "\nTotal Profit/Loss amount: " + str(profit))
-    print("\nHistory of Wins/Losses: " + str(history))
+    print("History of Wins/Losses: " + str(history))
     #ask for another round or exit
     print("\nPlay another round? (y/n) ")
     again = input()
     if again == 'n':
         playing = False
 
-
-    #for x in uHand:
-    #    print(x.name)
-    #for x in cHand:
-    #    print(x.name)
